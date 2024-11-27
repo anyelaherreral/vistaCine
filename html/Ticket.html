@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reserva de Entradas</title>
+    <link rel="stylesheet" href="../css/Ticket.css">
+</head>
+<body>
+    <div id="ticket-booking-app">
+        <div class="ticket-booking-container">
+            <div class="ticket-booking-card">
+                <div class="ticket-booking-card-header">
+                    <h1 class="ticket-booking-title">Sistema de Reserva de Entradas</h1>
+                </div>
+                <div class="ticket-booking-card-content">
+                    
+                    <!-- Selector de fecha -->
+                    <div class="date-selector">
+                        <label for="movie-date">Selecciona una fecha:</label>
+                        <input type="date" id="movie-date" name="movie-date">
+                    </div>
+                    <!-- Selector de función -->
+                    <div class="movie-show-selector">
+                        <select id="movie-show-select" class="movie-show-select-trigger">
+                            <option value="">Selecciona una función:</option>
+                        </select>
+                    </div>
+
+                    <!-- Información de la función -->
+                    <div id="movie-show-info" class="movie-show-info" style="display: none;">
+                        <h3 id="movie-title-time"></h3>
+                        <p class="theater-room-info"></p>
+                        <p class="ticket-price-info"></p>
+                        <p class="movie-duration"></p>
+                        <p class="movie-synopsis"></p>
+                        <p class="movie-genre"></p>
+                        <p class="theater-room-seats"></p>
+                    </div>
+
+                    <!-- Sección de asientos -->
+                    <div class="seat-selection-section">
+                        <!-- Leyenda -->
+                        <div class="seat-legend">
+                            <div class="seat-legend-item">
+                                <div class="seat-legend-color seat-available"></div>
+                                <span>Disponible</span>
+                            </div>
+                            <div class="seat-legend-item">
+                                <div class="seat-legend-color seat-occupied"></div>
+                                <span>Ocupado</span>
+                            </div>
+                            <div class="seat-legend-item">
+                                <div class="seat-legend-color seat-selected"></div>
+                                <span>Seleccionado</span>
+                            </div>
+                        </div>
+
+                        <!-- Layout del teatro -->
+                        <div id="theater-seating-layout" class="theater-seating-layout" style="display: none;">
+                            <div class="theater-screen"></div>
+                            <!-- Filas de asientos -->
+                            <div class="seat-row">
+                                <!-- <button class="theater-seat" data-seat-id="A1">A1</button>
+                                <button class="theater-seat" data-seat-id="A2">A2</button>
+                                <button class="theater-seat seat-occupied" data-seat-id="A3">A3</button>
+                                <button class="theater-seat" data-seat-id="A4">A4</button>
+                                <button class="theater-seat" data-seat-id="A5">A5</button>
+                                <button class="theater-seat" data-seat-id="A6">A6</button>
+                                <button class="theater-seat" data-seat-id="A7">A7</button>
+                                <button class="theater-seat" data-seat-id="A8">A8</button>
+                                <button class="theater-seat" data-seat-id="A8">A9</button> -->
+                            </div>
+                           
+                        </div>
+                    </div>
+
+                    <!-- Resumen de la reserva -->
+                    <div id="booking-summary" class="booking-summary">
+                        <p id="selected-seats-info">Asientos seleccionados: A1, B3</p>
+                        <p id="total-price">Total: $30,000</p>
+                        <button id="reserve-button" class="reserve-button">
+                            Reservar 2 asiento(s)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/Ticket.js"></script>
+</body>
+</html>

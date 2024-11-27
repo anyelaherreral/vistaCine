@@ -1,0 +1,63 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: url("../img/fondo.jpg") no-repeat center center fixed;
+  /*   background-color:rebeccapurple;*/
+  background-size: cover;
+  /*color: #fff;*/
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.login-card {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+  font-family: "Mogra", serif;
+  font-size: 50px;
+  color: #ffd700; /* Color dorado */
+  margin-bottom: 1rem;
+}
+
+.logo-container img {
+  display: block;
+  margin: 0 auto 1rem;
+  width: 100px;
+}
+
+.form-control {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.form-control::placeholder {
+  color: #bbb;
+}
+
+.btn-danger {
+  background-color: #d31024;
+  border-color: #d31024;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background-color: #ff5733;
+  border-color: #ff5733;
+}
+
+.form-label {
+  color: #fff;
+}
