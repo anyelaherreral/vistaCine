@@ -15,6 +15,8 @@ const selectedSeatsInfo = document.getElementById('selected-seats-info');
 const totalPrice = document.getElementById('total-price');
 const reserveButton = document.getElementById('reserve-button');
 const movieDateInput = document.getElementById('movie-date');
+const snackContainer = document.getElementById("snack-container");
+
 
 let selectedShow = null;
 let selectedSeats = [];
@@ -218,7 +220,6 @@ async function mostrarAsientos(salaId, funcionId) {
     }
 }
 
-
 // Función para manejar la selección de asientos
 function toggleSeatSelection(seatId, seatButton) {
     // Si el asiento ya está seleccionado, deseleccionarlo
@@ -235,26 +236,150 @@ function toggleSeatSelection(seatId, seatButton) {
     updateBookingSummary();
 }
 
-// Función para actualizar el resumen de la reserva
-function updateBookingSummary() {
-    // Verificar si hay una función seleccionada
-    if (selectedShow) {
-        // Calcular el precio total (asumiendo un precio por asiento)
-        const totalPriceValue = selectedShow.precioEntrada * selectedSeats.length;
+async function cargarCategorias() {
+    try {
+        const response = await fetch('http://localhost:8080/api/categorias-boletos');
         
-        // Actualizar la información de asientos seleccionados
-        selectedSeatsInfo.textContent = `Asientos seleccionados: ${selectedSeats.join(', ')}`;
+        if (!response.ok) {
+            throw new Error('No se pudieron obtener las categorías de boletos');
+        }
+
+        const categorias = await response.json();
+        console.log('Categorías de boletos:', categorias);
+
+        // Obtener el select donde se agregarán las opciones
+        const categorySelect = document.getElementById('category-select');
+
+        // Limpiar el selector antes de agregar nuevas opciones
+        categorySelect.innerHTML = '<option value="">categoría</option>';
+
+        // Agregar las opciones al selector
+        categorias.forEach(categoria => {
+            const option = document.createElement('option');
+            option.value = categoria.id;
+            option.textContent = `${categoria.descripcion} - $${categoria.precio.toLocaleString()}`;
+            categorySelect.appendChild(option);
+        });
+        // Escuchar el cambio de selección para actualizar el precio
+        categorySelect.addEventListener('change', function() {
+            const selectedCategoryId = this.value;
+            const selectedCategory = categorias.find(categoria => categoria.id == selectedCategoryId);
+            const nameCategory=selectedCategory.descripcion;
+            // Si se ha seleccionado una categoría, mostrar el precio
+            if (selectedCategory) {
+                document.getElementById('total-price').style.display = 'block';
+                const totalPrice = selectedCategory.precio * selectedSeats.length;
+                document.getElementById('total-price').textContent = `Total: $${totalPrice.toLocaleString()}`;
+                // Llamar a la función para verificar el descuento
+                cargarDescuento(selectedCategory.id, totalPrice, nameCategory);
+            } else {
+                // Si no se seleccionó una categoría, ocultar el precio
+                document.getElementById('total-price').style.display = 'none';
+                document.getElementById('discount-message').style.display = 'none';
+
+            }
+        });
         
-        // Actualizar el precio total
-        totalPrice.textContent = `Total: $${totalPriceValue.toLocaleString()}`;
-        
-        // Actualizar el botón de reserva
-        reserveButton.textContent = `Reservar ${selectedSeats.length} asiento(s)`;
-        reserveButton.disabled = selectedSeats.length === 0;
+    } catch (error) {
+        console.error('Error al cargar las categorías:', error);
+        alert('Hubo un problema al cargar las categorías de boletos');
     }
 }
 
+// Función para cargar los descuentos aplicables a la categoría seleccionada
+async function cargarDescuento(categoriaId, precioTotal, nameCategory) {
+    try {
+        const response = await fetch('http://localhost:8080/api/categoria-boleto-promocion');
+        
+        if (!response.ok) {
+            throw new Error('No se pudieron obtener los descuentos');
+        }
 
+        const promociones = await response.json();
+        console.log('Descuentos aplicables:', promociones);
+        
+        // Buscar el descuento correspondiente a la categoría seleccionada
+        const descuentoAplicable = promociones.find(promocion => promocion.categoriaBoleto.id === categoriaId);
+
+        if (descuentoAplicable) {
+            // Mostrar el mensaje de descuento y el precio con descuento
+            const descuento = descuentoAplicable.descuento;
+            const descripcionPromocion = descuentoAplicable.promocion.descripcion;
+            const precioConDescuento = precioTotal-(precioTotal * (descuento / 100));
+
+            // Actualizar el mensaje de descuento
+            document.getElementById('discount-description').textContent = `Válido para aplicar descuento de ${descuento}% en boletos ${nameCategory}`;
+            document.getElementById('discounted-price').textContent = `Precio con descuento aplicado: $${precioConDescuento.toLocaleString()}`;
+
+            // Mostrar el contenedor de descuento
+            document.getElementById('discount-message').style.display = 'block';
+        } else {
+            // Si no hay descuento aplicable, ocultar el mensaje de descuento
+            document.getElementById('discount-message').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error al cargar los descuentos:', error);
+        alert('Hubo un problema al cargar los descuentos');
+    }
+}
+
+// Función para actualizar el resumen de la reserva
+function updateBookingSummary() {
+    if (selectedSeats.length > 0) {
+        document.getElementById("booking-summary").style.display = "block"; // Mostrar el resumen
+        cargarCategorias();
+        loadSnacks();
+    } else {
+        document.getElementById("booking-summary").style.display = "none"; // Ocultar el resumen si no hay asientos seleccionados
+    }
+    // Actualizar la información de asientos seleccionados
+    selectedSeatsInfo.textContent = `Asientos seleccionados: ${selectedSeats.join(', ')}`;
+    
+    // Mostrar el total (aún no lo calcularemos, pero el formato se mantiene)
+    totalPrice.textContent = `Total: $${(selectedSeats.length * 300).toLocaleString()}`; // Ejemplo de cálculo con un precio fijo
+
+    // Actualizar el texto del botón de reserva
+    reserveButton.textContent = `Reservar ${selectedSeats.length} asiento(s)`;
+    reserveButton.disabled = selectedSeats.length === 0; // Deshabilitar el botón si no hay asientos seleccionados
+}
+
+// Función para cargar snacks
+async function loadSnacks() {
+    try {
+        const response = await fetch('http://localhost:8080/snacks');
+        if (!response.ok) throw new Error("Error al cargar los snacks");
+        const snacks = await response.json();
+
+        // Renderizar snacks
+        snackContainer.innerHTML = ""; // Limpiar contenedor
+        snacks.forEach((snack) => {
+            const snackCard = document.createElement("div");
+            snackCard.className = `snack-card ${
+                snack.cantidadDisponible === 0 ? "disabled" : ""
+            }`;
+
+            // Detalles del snack
+            snackCard.innerHTML = `
+                <h3>${snack.id}</h3>
+                <p>${snack.descripcion}</p>
+                <p>Precio: $${snack.precio.toLocaleString()}</p>
+                <p>Cantidad Disponible: ${snack.cantidadDisponible}</p>
+                <button 
+                    class="reserveSnack-button" 
+                    ${snack.cantidadDisponible === 0 ? "disabled" : ""}
+                    data-snack-id="${snack.id}">
+                    Reservar
+                </button>
+            `;
+
+            // Agregar al contenedor
+            snackContainer.appendChild(snackCard);
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        snackContainer.innerHTML = "<p>Error al cargar los snacks.</p>";
+    }
+}
 
 // Modificar el evento de reserva para enviar los asientos seleccionados
 reserveButton.addEventListener('click', async () => {
@@ -286,8 +411,8 @@ reserveButton.addEventListener('click', async () => {
             selectedSeats = [];
             updateBookingSummary();
             
-            // Actualizar la vista de asientos
-            obtenerAsientosPorFuncion(selectedShow.id, selectedShow.sala.num_asientos);
+            // Actualizar la vista de asientos (para reflejar los asientos ocupados)
+            mostrarAsientos(selectedShow.sala.id, selectedShow.id);
 
         } catch (error) {
             console.error('Error al realizar la reserva:', error);
@@ -295,7 +420,3 @@ reserveButton.addEventListener('click', async () => {
         }
     }
 });
-// Inicialización
-// generateSeats();
-// updateBookingSummary();
-// populateShowSelector();

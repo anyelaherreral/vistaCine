@@ -63,25 +63,37 @@
                             <div class="seat-row">
                                 <!-- <button class="theater-seat" data-seat-id="A1">A1</button>
                                 <button class="theater-seat" data-seat-id="A2">A2</button>
-                                <button class="theater-seat seat-occupied" data-seat-id="A3">A3</button>
-                                <button class="theater-seat" data-seat-id="A4">A4</button>
-                                <button class="theater-seat" data-seat-id="A5">A5</button>
-                                <button class="theater-seat" data-seat-id="A6">A6</button>
-                                <button class="theater-seat" data-seat-id="A7">A7</button>
-                                <button class="theater-seat" data-seat-id="A8">A8</button>
-                                <button class="theater-seat" data-seat-id="A8">A9</button> -->
+                                <button class="theater-seat seat-occupied" data-seat-id="A3">A3</button> -->
                             </div>
                            
                         </div>
                     </div>
 
                     <!-- Resumen de la reserva -->
-                    <div id="booking-summary" class="booking-summary">
-                        <p id="selected-seats-info">Asientos seleccionados: A1, B3</p>
-                        <p id="total-price">Total: $30,000</p>
-                        <button id="reserve-button" class="reserve-button">
-                            Reservar 2 asiento(s)
-                        </button>
+                    <div id="booking-summary" class="booking-summary" style="display: none;">
+                        <p id="selected-seats-info">Asientos seleccionados: </p>
+
+                           <!-- Selector para elegir la categoría de boleto -->
+                         <div class="category-selector">
+                            <label for="category-select">Selecciona una </label>
+                            <select id="category-select" class="category-select-trigger">
+                                 <option value=""></option>
+                             </select>
+                         </div>
+
+                        <p id="total-price" style="display: none;"></p>
+
+                        <!-- Contenedor para el mensaje de descuento y el precio con descuento -->
+                        <div id="discount-message" style="display: none;">
+                            <p id="discount-description"></p>
+                            <p id="discounted-price"></p>
+                        </div>
+
+                        <div id="snack-container" class="snack-container">
+                            <!-- Los snacks se cargarán aquí -->
+                        </div>
+                        
+                        <button id="reserve-button" class="reserve-button"></button>
                     </div>
                 </div>
             </div>

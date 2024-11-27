@@ -145,6 +145,36 @@ body {
     text-align: center;
 }
 
+.snack-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 10px;
+    width: 200px;
+    display: inline-block;
+    text-align: center;
+}
+
+.snack-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.reserveSnack-button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#reserveSnack-button {
+    display: block; /* Asegúrate de que no esté en "none" */
+    visibility: visible; /* Asegúrate de que no esté en "hidden" */
+}
+
+
 .reserve-button {
     padding: 10px 20px;
     font-size: 16px;
