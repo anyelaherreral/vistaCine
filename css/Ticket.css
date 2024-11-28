@@ -144,48 +144,74 @@ body {
 .booking-summary {
     text-align: center;
 }
-
-.snack-card {
+#snacks-section {
+    margin-top: 20px;
+    padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 16px;
-    margin: 10px;
-    width: 200px;
-    display: inline-block;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.snack-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fff;
+    width: 180px;
     text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.snack-card:hover {
+    transform: scale(1.05);
+}
+
+#snack-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .snack-card.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background-color: #f0f0f0;
+    color: #999;
+    pointer-events: none;
 }
 
-.reserveSnack-button {
-    background-color: #007BFF;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#reserveSnack-button {
-    display: block; /* Asegúrate de que no esté en "none" */
-    visibility: visible; /* Asegúrate de que no esté en "hidden" */
-}
-
-
-.reserve-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #2ecc71;
+.snack-card button {
+    background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.reserve-button:disabled {
-    background-color: #95a5a6;
+.snack-card button:disabled {
+    background-color: #ccc;
     cursor: not-allowed;
+}
+
+.snack-card button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+#snack-total-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#snack-total {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 1rem;
+    text-align: right;
+    width: 100px;
+    background-color: #f0f0f0;
 }

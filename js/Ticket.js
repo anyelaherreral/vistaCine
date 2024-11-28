@@ -235,6 +235,9 @@ function toggleSeatSelection(seatId, seatButton) {
     // Actualizar el resumen de la reserva
     updateBookingSummary();
 }
+// Variables para manejar los precios
+let totalBoletosConDescuento = 0;
+let totalSnacksConDescuento = 0;
 
 async function cargarCategorias() {
     try {
@@ -251,7 +254,7 @@ async function cargarCategorias() {
         const categorySelect = document.getElementById('category-select');
 
         // Limpiar el selector antes de agregar nuevas opciones
-        categorySelect.innerHTML = '<option value="">categoría</option>';
+        categorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
 
         // Agregar las opciones al selector
         categorias.forEach(categoria => {
@@ -260,23 +263,21 @@ async function cargarCategorias() {
             option.textContent = `${categoria.descripcion} - $${categoria.precio.toLocaleString()}`;
             categorySelect.appendChild(option);
         });
+
         // Escuchar el cambio de selección para actualizar el precio
         categorySelect.addEventListener('change', function() {
             const selectedCategoryId = this.value;
             const selectedCategory = categorias.find(categoria => categoria.id == selectedCategoryId);
-            const nameCategory=selectedCategory.descripcion;
-            // Si se ha seleccionado una categoría, mostrar el precio
+            const nameCategory = selectedCategory.descripcion;
+
             if (selectedCategory) {
                 document.getElementById('total-price').style.display = 'block';
-                const totalPrice = selectedCategory.precio * selectedSeats.length;
-                document.getElementById('total-price').textContent = `Total: $${totalPrice.toLocaleString()}`;
-                // Llamar a la función para verificar el descuento
-                cargarDescuento(selectedCategory.id, totalPrice, nameCategory);
+                totalBoletosConDescuento = selectedCategory.precio * selectedSeats.length;
+                document.getElementById('total-price').textContent = `Total boletos: $${totalBoletosConDescuento.toLocaleString()}`;
+                cargarDescuento(selectedCategory.id, totalBoletosConDescuento, nameCategory);
             } else {
-                // Si no se seleccionó una categoría, ocultar el precio
                 document.getElementById('total-price').style.display = 'none';
                 document.getElementById('discount-message').style.display = 'none';
-
             }
         });
         
@@ -286,7 +287,6 @@ async function cargarCategorias() {
     }
 }
 
-// Función para cargar los descuentos aplicables a la categoría seleccionada
 async function cargarDescuento(categoriaId, precioTotal, nameCategory) {
     try {
         const response = await fetch('http://localhost:8080/api/categoria-boleto-promocion');
@@ -296,32 +296,31 @@ async function cargarDescuento(categoriaId, precioTotal, nameCategory) {
         }
 
         const promociones = await response.json();
-        console.log('Descuentos aplicables:', promociones);
-        
-        // Buscar el descuento correspondiente a la categoría seleccionada
         const descuentoAplicable = promociones.find(promocion => promocion.categoriaBoleto.id === categoriaId);
+        let precioConDescuento = precioTotal;
 
         if (descuentoAplicable) {
-            // Mostrar el mensaje de descuento y el precio con descuento
             const descuento = descuentoAplicable.descuento;
-            const descripcionPromocion = descuentoAplicable.promocion.descripcion;
-            const precioConDescuento = precioTotal-(precioTotal * (descuento / 100));
+            precioConDescuento = precioTotal - (precioTotal * (descuento / 100));
 
-            // Actualizar el mensaje de descuento
             document.getElementById('discount-description').textContent = `Válido para aplicar descuento de ${descuento}% en boletos ${nameCategory}`;
-            document.getElementById('discounted-price').textContent = `Precio con descuento aplicado: $${precioConDescuento.toLocaleString()}`;
+            document.getElementById('discounted-price').textContent = `Precio con descuento aplicado: $${precioConDescuento.toLocaleString('es-CO')}`;
 
-            // Mostrar el contenedor de descuento
             document.getElementById('discount-message').style.display = 'block';
         } else {
-            // Si no hay descuento aplicable, ocultar el mensaje de descuento
             document.getElementById('discount-message').style.display = 'none';
         }
+
+        // Asegúrate de almacenar el valor como un número sin formato
+        totalBoletosConDescuento = parseFloat(precioConDescuento.toFixed(2));
+        console.log('TotalBC320:', totalBoletosConDescuento);
+
     } catch (error) {
         console.error('Error al cargar los descuentos:', error);
         alert('Hubo un problema al cargar los descuentos');
     }
 }
+
 
 // Función para actualizar el resumen de la reserva
 function updateBookingSummary() {
@@ -335,9 +334,6 @@ function updateBookingSummary() {
     // Actualizar la información de asientos seleccionados
     selectedSeatsInfo.textContent = `Asientos seleccionados: ${selectedSeats.join(', ')}`;
     
-    // Mostrar el total (aún no lo calcularemos, pero el formato se mantiene)
-    totalPrice.textContent = `Total: $${(selectedSeats.length * 300).toLocaleString()}`; // Ejemplo de cálculo con un precio fijo
-
     // Actualizar el texto del botón de reserva
     reserveButton.textContent = `Reservar ${selectedSeats.length} asiento(s)`;
     reserveButton.disabled = selectedSeats.length === 0; // Deshabilitar el botón si no hay asientos seleccionados
@@ -346,40 +342,104 @@ function updateBookingSummary() {
 // Función para cargar snacks
 async function loadSnacks() {
     try {
-        const response = await fetch('http://localhost:8080/snacks');
-        if (!response.ok) throw new Error("Error al cargar los snacks");
-        const snacks = await response.json();
+        const [snacksResponse, promociones] = await Promise.all([
+            fetch('http://localhost:8080/snacks'),
+            cargarPromocionesSnacks(),
+        ]);
 
-        // Renderizar snacks
-        snackContainer.innerHTML = ""; // Limpiar contenedor
+        if (!snacksResponse.ok) throw new Error("Error al cargar los snacks");
+        const snacks = await snacksResponse.json();
+
+        snackContainer.innerHTML = "";
+
         snacks.forEach((snack) => {
+            const snackPromo = promociones.find(promo => promo.snack.id === snack.id);
+            const descuento = snackPromo ? snackPromo.descuento : 0;
+            const precioConDescuento = snackPromo ? snack.precio * (1 - descuento / 100) : snack.precio;
             const snackCard = document.createElement("div");
-            snackCard.className = `snack-card ${
-                snack.cantidadDisponible === 0 ? "disabled" : ""
-            }`;
+            snackCard.className = `snack-card ${snack.cantidadDisponible === 0 ? "disabled" : ""}`;
 
-            // Detalles del snack
             snackCard.innerHTML = `
-                <h3>${snack.id}</h3>
-                <p>${snack.descripcion}</p>
+                <h3>${snack.descripcion}</h3>
                 <p>Precio: $${snack.precio.toLocaleString()}</p>
+                ${descuento > 0 ? `<p>Descuento: ${descuento}%</p><p>Precio con descuento: $${precioConDescuento.toLocaleString()}</p>` : ""}
                 <p>Cantidad Disponible: ${snack.cantidadDisponible}</p>
-                <button 
-                    class="reserveSnack-button" 
-                    ${snack.cantidadDisponible === 0 ? "disabled" : ""}
-                    data-snack-id="${snack.id}">
-                    Reservar
-                </button>
+                <label for="quantity-${snack.id}">Cantidad:</label>
+                <input type="number" id="quantity-${snack.id}" class="snack-quantity" value="0" min="0" max="${snack.cantidadDisponible}" data-snack-id="${snack.id}" data-snack-price="${precioConDescuento}" />
             `;
 
-            // Agregar al contenedor
             snackContainer.appendChild(snackCard);
         });
+
+        document.getElementById("snacks-section").style.display = snacks.length > 0 ? "block" : "none";
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error al cargar los snacks:", error);
         snackContainer.innerHTML = "<p>Error al cargar los snacks.</p>";
+        document.getElementById("snacks-section").style.display = "none";
     }
 }
+
+function parseCurrency(value) {
+    // Remover caracteres no numéricos como $ y puntos
+    return parseFloat(value.replace(/[^0-9.-]+/g, ""));
+}
+
+// Función para actualizar el total combinado (boletos + snacks)
+document.getElementById('calculate-total').addEventListener('click', () => {
+    // Extraer y limpiar correctamente el total de snacks
+    const totalSnacks = parseFloat(
+        document.getElementById("snack-total").value);
+
+    // Convertir totalBoletosConDescuento a número entero
+    const totalBoletos = totalBoletosConDescuento;
+    // Sumar totales
+    const combinedTotal = totalBoletos + totalSnacks;
+
+    // Formatear el total combinado
+    const formattedTotal = new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(combinedTotal);
+
+    // Mostrar el total correctamente formateado
+    document.getElementById("combined-total").textContent = `Total a pagar: ${formattedTotal}`;
+});
+
+async function cargarPromocionesSnacks() {
+    try {
+        const response = await fetch('http://localhost:8080/SnackPromocion');
+        if (!response.ok) throw new Error("Error al cargar las promociones de snacks");
+        const promociones = await response.json();
+        return promociones;
+    } catch (error) {
+        console.error("Error al cargar las promociones de snacks:", error);
+        return [];
+    }
+}
+
+// Gestión de selección de snacks
+let snackTotal = 0;
+
+// Evento global para manejar clicks en los botones de snacks
+document.addEventListener("input", (event) => {
+    if (event.target.classList.contains("snack-quantity")) {
+        // Calcular el total de snacks
+        snackTotal = 0;
+
+        document.querySelectorAll(".snack-quantity").forEach(input => {
+            const cantidad = parseInt(input.value) || 0;
+            const precio = parseFloat(input.getAttribute("data-snack-price")) || 0;
+            const subtotal = cantidad * precio;
+            
+            snackTotal += subtotal;
+        });
+
+        document.getElementById("snack-total").value =snackTotal;
+    }
+});
+
 
 // Modificar el evento de reserva para enviar los asientos seleccionados
 reserveButton.addEventListener('click', async () => {
@@ -420,3 +480,83 @@ reserveButton.addEventListener('click', async () => {
         }
     }
 });
+
+document.getElementById('search-client').addEventListener('click', async () => {
+    const documentNumber = document.getElementById('document-number').value;
+
+    if (!documentNumber) {
+        alert("Por favor, ingresa un número de documento.");
+        return;
+    }
+
+    try {
+        // Llamar al servicio para buscar cliente por documento
+        const response = await fetch(`http://localhost:8080/clientes/buscar-por-documento?documento=${documentNumber}`);
+        
+        if (response.ok) {
+            const client = await response.json();
+            alert(`Cliente encontrado: ${client.nombre}`);
+            
+            // Habilitar el botón de reservar
+            document.getElementById('reserve-button').disabled = false;
+        } else if (response.status === 404) {
+            alert("Cliente no encontrado. Por favor, regístrate.");
+            
+            // Mostrar el formulario de registro
+            const registerForm = document.getElementById('register-client-form');
+            registerForm.style.display = "block";
+
+            // Rellenar el campo de documento en el formulario de registro
+            document.getElementById('client-document').value = documentNumber;
+        } else {
+            throw new Error("Error al buscar cliente.");
+        }
+    } catch (error) {
+        console.error("Error al buscar cliente:", error);
+        alert("Hubo un problema al buscar al cliente.");
+    }
+});
+
+document.getElementById('register-client').addEventListener('click', async () => {
+    const name = document.getElementById('client-name').value;
+    const documentNumber = document.getElementById('client-document').value;
+    const phone = document.getElementById('client-phone').value;
+    const email = document.getElementById('client-email').value;
+
+    if (!name || !phone || !email) {
+        alert("Por favor, completa todos los campos.");
+        return;
+    }
+
+    const clientData = {
+        nombre: name,
+        documento: documentNumber,
+        telefono: phone,
+        email: email
+    };
+
+    try {
+        // Llamar al servicio para registrar al cliente
+        const response = await fetch('http://localhost:8080/clientes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(clientData),
+        });
+
+        if (response.ok) {
+            alert("Cliente registrado exitosamente.");
+
+            // Ocultar el formulario de registro y habilitar el botón de reservar
+            document.getElementById('register-client-form').style.display = "none";
+            document.getElementById('reserve-button').disabled = false;
+        } else {
+            throw new Error("Error al registrar cliente.");
+        }
+    } catch (error) {
+        console.error("Error al registrar cliente:", error);
+        alert("Hubo un problema al registrar al cliente.");
+    }
+});
+

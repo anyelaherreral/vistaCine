@@ -89,11 +89,41 @@
                             <p id="discounted-price"></p>
                         </div>
 
-                        <div id="snack-container" class="snack-container">
-                            <!-- Los snacks se cargarán aquí -->
+                        <div id="snacks-section" style="display: none;">
+                            <h2>Selecciona tus Snacks</h2>
+                            <div id="snack-container"></div>
+                            <div id="snack-total-container">
+                                <label for="snack-total">Total por Snacks: </label>
+                                <input type="text" id="snack-total" value="$0" readonly />
+                            </div>
+                        </div>
+
+                        <!-- Botón para calcular el total -->
+                        <button id="calculate-total" class="calculate-total-button">Calcular Total</button>
+                        <div id="final-total">
+                            <p>Total a pagar: <span id="combined-total">$0</span></p>
+                        </div>
+
+                        <div id="client-section">
+                            <label for="document-number">Número de documento:</label>
+                            <input type="text" id="document-number" />
+                            <button id="search-client">Buscar Cliente</button>
+                        
+                            <form id="register-client-form" style="display: none;">
+                                <h3>Registrar Cliente</h3>
+                                <label for="client-name">Nombre:</label>
+                                <input type="text" id="client-name" />
+                                <label for="client-document">Documento:</label>
+                                <input type="text" id="client-document" readonly />
+                                <label for="client-phone">Teléfono:</label>
+                                <input type="text" id="client-phone" />
+                                <label for="client-email">Correo Electrónico:</label>
+                                <input type="email" id="client-email" />
+                                <button type="button" id="register-client">Registrar</button>
+                            </form>
                         </div>
                         
-                        <button id="reserve-button" class="reserve-button"></button>
+                        <button id="reserve-button" class="reserve-button" disabled></button>
                     </div>
                 </div>
             </div>
