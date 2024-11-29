@@ -13,6 +13,8 @@ const theaterSeatingLayout = document.getElementById('theater-seating-layout');
 const selectedSeatsInfo = document.getElementById('selected-seats-info');
 const movieDateInput = document.getElementById('movie-date');
 const snackContainer = document.getElementById("snack-container");
+const buscadorsnacks = document.getElementById("buscadorSnacks");
+
 
 let selectedSnacks = [];
 let selectedShow = null;
@@ -267,24 +269,31 @@ function updateBookingSummary() {
 }
 
 // Función para cargar snacks
+let snacks = [];
+
+// Función para cargar snacks
 async function loadSnacks() {
     try {
         const [snacksResponse, promociones] = await Promise.all([
-            fetch('http://localhost:8080/snacks'),
-            cargarPromocionesSnacks(),
+            fetch('http://localhost:8080/snacks'), // Ajusta la URL si es necesario
+            cargarPromocionesSnacks(), // Asegúrate de tener esta función definida
         ]);
+
         if (!snacksResponse.ok) throw new Error("Error al cargar los snacks");
-        const snacks = await snacksResponse.json();
+
+        snacks = await snacksResponse.json(); // Asigna los snacks a la variable global
         snackContainer.innerHTML = "";
         snacks.forEach((snack) => {
             const snackPromo = promociones.find(promo => promo.snack.id === snack.id);
             const descuento = snackPromo ? snackPromo.descuento : 0;
             const precioConDescuento = snackPromo ? snack.precio * (1 - descuento / 100) : snack.precio;
+
             const snackCard = document.createElement("div");
             snackCard.className = `snack-card ${snack.cantidadDisponible === 0 ? "disabled" : ""}`;
 
             snackCard.innerHTML = `
-                <h3>${snack.descripcion}</h3>
+                <h3>${snack.id}</h3> <!-- Mostrar el ID del snack -->
+                <p>Descripción: ${snack.descripcion}</p>
                 <p>Precio: $${snack.precio.toLocaleString()}</p>
                 ${descuento > 0 ? `<p>Descuento: ${descuento}%</p><p>Precio con descuento: $${precioConDescuento.toLocaleString()}</p>` : ""}
                 <p>Cantidad Disponible: ${snack.cantidadDisponible}</p>
@@ -294,6 +303,7 @@ async function loadSnacks() {
             snackContainer.appendChild(snackCard);
         });
 
+        // Mostrar la sección de snacks si hay resultados
         document.getElementById("snacks-section").style.display = snacks.length > 0 ? "block" : "none";
     } catch (error) {
         console.error("Error al cargar los snacks:", error);
@@ -301,6 +311,45 @@ async function loadSnacks() {
         document.getElementById("snacks-section").style.display = "none";
     }
 }
+
+
+//BUSCADOR DE Snacks
+
+function mostrarsnacks(snacksFiltradas) {
+    snackContainer.innerHTML = "";  // Limpiar el contenedor de snacks
+    snacksFiltradas.forEach((snack) => {
+        const snackCard = document.createElement("div");
+        snackCard.className = `snack-card ${snack.cantidadDisponible === 0 ? "disabled" : ""}`;
+
+        snackCard.innerHTML = `
+            <h3>${snack.id}</h3> <!-- Mostrar el ID del snack -->
+            <p>Descripción: ${snack.descripcion}</p>
+            <p>Precio: $${snack.precio.toLocaleString()}</p>
+            <p>Cantidad Disponible: ${snack.cantidadDisponible}</p>
+            <label for="quantity-${snack.id}">Cantidad:</label>
+            <input type="number" id="quantity-${snack.id}" class="snack-quantity" value="0" min="0" max="${snack.cantidadDisponible}" data-snack-id="${snack.id}" data-snack-price="${snack.precio}" />
+        `;
+        snackContainer.appendChild(snackCard);
+    });
+
+    // Si no hay snacks filtrados, mostrar un mensaje
+    if (snacksFiltradas.length === 0) {
+        snackContainer.innerHTML = "<p>No se encontraron snacks que coincidan con la búsqueda.</p>";
+    }
+}
+
+// Función para filtrar snacks solo por ID
+
+function filtrarSnacks() {
+    const termino = buscadorSnacks.value.toLowerCase();  // Obtener el valor del buscador
+    const snacksFiltrados = snacks.filter(
+        (snack) => snack.id.toLowerCase().includes(termino)  // Filtrar por nombre (id) del snack
+    );
+    mostrarsnacks(snacksFiltrados);  // Mostrar los snacks filtrados
+}
+
+// Evento de entrada en el campo de búsqueda
+buscadorSnacks.addEventListener("input", filtrarSnacks);
 
 // Función para actualizar el total combinado (boletos + snacks)
 document.getElementById('calculate-total').addEventListener('click', () => {

@@ -21,7 +21,7 @@ document.getElementById('search-client').addEventListener('click', async () => {
             
             // Asignar el id del cliente encontrado a la variable global
             clientId = client.id;
-            clienteNombre = client.nombre;
+            clienteNombre = client;
             console.log("ID del cliente encontrado:", clientId);
 
             // Habilitar el botón de reservar
@@ -78,6 +78,7 @@ document.getElementById('register-client').addEventListener('click', async () =>
 
             // Asignar el id del nuevo cliente registrado a la variable global
             clientId = client.id;
+            clienteNombre = client.nombre;
             console.log("ID del nuevo cliente registrado:", clientId);
             // Ocultar el formulario de registro y habilitar el botón de reservar
             document.getElementById('register-client-form').style.display = "none";
