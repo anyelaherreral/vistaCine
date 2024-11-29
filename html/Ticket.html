@@ -101,7 +101,7 @@
                         <!-- Botón para calcular el total -->
                         <button id="calculate-total" class="calculate-total-button">Calcular Total</button>
                         <div id="final-total">
-                            <p>Total a pagar: <span id="combined-total">$0</span></p>
+                            <p>-<span id="combined-total">$0</span></p>
                         </div>
 
                         <div id="client-section">
@@ -125,12 +125,33 @@
                         
                         <button id="reserve-button" class="reserve-button" disabled></button>
                     </div>
+
+                    <!-- Modal para el resumen del pedido -->
+                    <div id="order-modal" class="modal">
+                        <div class="modal-content">
+                            <span id="close-modal" class="close">&times;</span>
+                            <h2>Resumen del Pedido</h2>
+                            <p><strong>Fecha:</strong> <span id="order-date"></span></p>
+                            <p><strong>Total:</strong> <span id="order-total"></span></p>
+                            <p><strong>Cliente:</strong> <span id="order-client"></span></p>
+                            
+                            <label for="payment-method-select">Método de Pago:</label>
+                            <select id="payment-method-select">
+                                <option value="">Seleccione un método</option>
+                            </select>
+
+                            <button id="confirm-order">Confirmar Pedido</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="../js/Ticket.js"></script>
+    <script type="module" src="../js/ClienteT.js"></script>
+    <script type="module" src="../js/Pedido.js"></script>
+    <script type="module" src="../js/Ticket.js"></script>
+
 </body>
 </html>
